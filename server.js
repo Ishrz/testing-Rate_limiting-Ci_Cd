@@ -4,9 +4,22 @@ import morgan from "morgan";
 import Redis from "ioredis";
 import mongoose from "mongoose";
 import { User } from "./models/user.model.js";
+import rateLimit from "express-rate-limit"
 
 const app = express();
 
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message:{
+    error: "Too many requests from this IP, please try again after 15 minutes"
+  },
+  statusCode: 429,
+  standardHeaders: true, 
+  legacyHeaders: false,
+});
+
+app.use(globalLimiter);
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(morgan("dev"));
