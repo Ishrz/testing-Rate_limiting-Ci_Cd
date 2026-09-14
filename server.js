@@ -5,8 +5,11 @@ import Redis from "ioredis";
 import mongoose from "mongoose";
 import { User } from "./models/user.model.js";
 import rateLimit from "express-rate-limit"
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -18,6 +21,10 @@ const globalLimiter = rateLimit({
   standardHeaders: true, 
   legacyHeaders: false,
 });
+
+app.set('view engine', 'ejs');
+
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(globalLimiter);
 app.use(express.json());
@@ -48,6 +55,13 @@ redis.once("ready", () => {
 
 redis.on("error", (err) => {
   console.log(`Redis error: ${err}`);
+});
+
+
+app.get('/', async (req, res) => {
+
+  // res.render('filename', { data to pass to template })
+  res.render('index');
 });
 
 app.post("/user", async (req, res) => {
